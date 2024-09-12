@@ -140,12 +140,12 @@ def main():
     soup = scrape_entire_page(url)
     form = scrape_forms(url)
 
-    if soup:
-        print("Scraping successful! Exporting to PDF...")
-        export_to_pdf(soup, "scraped_content.pdf")
-    else:
+    if form:
         print("Forms submitted successfully.")
         export_to_pdf(form, "submitted_forms.pdf")
+    else:
+        print("Scraping successful! Exporting to PDF...")
+        export_to_pdf(soup, "scraped_content.pdf")
 
 if __name__ == "__main__":
     main()
