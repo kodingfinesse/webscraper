@@ -57,95 +57,17 @@ def export_to_pdf(soup, filename):
     pdf.output(filename)
     print(f"Content exported to {filename}")
 
-# Function to detect and scrape forms from the page
-def scrape_forms(url):
-    html_content = get_html_content(url)
-    if not html_content:
-        return None
-
-    soup = BeautifulSoup(html_content, 'html.parser')
-
-    forms = soup.find_all('form')
-
-    if not forms:
-        print("No forms found on the page.")
-        return None
-
-    print(f"Found {len(forms)} form(s) on the page.")
-
-    # Iterate over forms and extract fields
-    for i, form in enumerate(forms):
-        print(f"\nForm {i+1}:")
-        form_action = form.get('action')
-        form_method = form.get('method', 'get').lower()  # Default method is GET
-
-        print(f"Action: {form_action}")
-        print(f"Method: {form_method.upper()}")
-
-        # Get all input fields
-        form_inputs = form.find_all('input')
-        form_data = {}
-
-        for input_element in form_inputs:
-            input_name = input_element.get('name')
-            input_type = input_element.get('type')
-            input_value = input_element.get('value', '')
-
-            # Fill the form automatically (this is where you customize)
-            if input_type == 'text':
-                # Default text field value
-                form_data[input_name] = 'default_text_value'
-            elif input_type == 'email':
-                form_data[input_name] = 'example@example.com'
-            elif input_type == 'password':
-                form_data[input_name] = 'password123'
-            elif input_type == 'hidden':
-                # Hidden fields, use their default value
-                form_data[input_name] = input_value
-            else:
-                # Add a placeholder for unhandled input types
-                form_data[input_name] = input_value
-
-        print("Form data to be submitted:")
-        print(form_data)
-
-        # Submit the form
-        submit_form(url, form_action, form_method, form_data)
-
-# Function to submit the form with the data
-def submit_form(base_url, form_action, form_method, form_data):
-    if not form_action.startswith("http"):
-        # If form action is relative, build the full URL
-        form_action = f"{base_url.rstrip('/')}/{form_action.lstrip('/')}"
-
-    try:
-        if form_method == 'post':
-            response = requests.post(form_action, data=form_data)
-        else:
-            response = requests.get(form_action, params=form_data)
-
-        # Print the response from the form submission
-        if response.status_code == 200:
-            print("Form submitted successfully!")
-            print("Response:")
-            print(response.text[:500])  # Print the first 500 characters of the response
-        else:
-            print(f"Form submission failed with status code: {response.status_code}")
-    except Exception as e:
-        print(f"Error during form submission: {e}")
-
 # Main function to get user input and perform scraping
 def main():
     url = input("Enter the URL to scrape: ")
     soup = scrape_entire_page(url)
-    form = scrape_forms(url)
 
-    if form:
-        print("Forms submitted successfully.")
-        export_to_pdf(form, "submitted_forms.pdf")
-    else:
+    if soup:
         print("Scraping successful! Exporting to PDF...")
         export_to_pdf(soup, "scraped_content.pdf")
+    else:
+        print("Scraping was not successful.")
+
 
 if __name__ == "__main__":
     main()
